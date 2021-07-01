@@ -1,7 +1,8 @@
+import os
 import discord
 from discord.ext import commands
 import mysql.connector
-
+from dotenv import load_dotenv
 description = '''An example bot to showcase the discord.ext.commands extension
 module.
 There are a number of utility commands being showcased here.'''
@@ -9,10 +10,13 @@ There are a number of utility commands being showcased here.'''
 intents = discord.Intents.default()
 intents.members = True
 
-db_host = "localhost"
-db_user = "tarkov"
-db_password = "Killa69!"
-db_name = "Tarkov"
+load_dotenv()
+
+host = os.getenv('DB_HOST')
+user = os.getenv('DB_USER')
+password = os.getenv('DB_PASSWORD')
+database = os.getenv('DB_DATABASE')
+
 
 wipe_password = "boom"
 
@@ -28,10 +32,10 @@ async def on_ready():
 @bot.command()
 async def create(ctx, name: str, discord_id: str, ):
     db = mysql.connector.connect(
-        host=db_host,
-        user=db_user,
-        password=db_password,
-        database=db_name
+        host=host,
+        user=user,
+        password=password,
+        database=database
     )
 
     mysql_insert_query = """INSERT INTO teamkills (`name`, `discord_id`, `deaths`) 
@@ -54,10 +58,10 @@ async def add(ctx, name: str):
     msg = "TK ADDED: \n"
 
     db = mysql.connector.connect(
-        host=db_host,
-        user=db_user,
-        password=db_password,
-        database=db_name
+        host=host,
+        user=user,
+        password=password,
+        database=database
     )
 
     cursor = db.cursor()
@@ -86,10 +90,10 @@ async def check(ctx):
     msg = "TeamKillers: \n"
 
     db = mysql.connector.connect(
-        host=db_host,
-        user=db_user,
-        password=db_password,
-        database=db_name
+        host=host,
+        user=user,
+        password=password,
+        database=database
     )
 
     cursor = db.cursor()
@@ -107,21 +111,21 @@ async def check(ctx):
 
 
 @bot.command()
-async def wipe(ctx, pass: str):
+async def wipe(ctx, password: str):
     """Wipe TK`s"""
     # await ctx.message.delete()
     db = mysql.connector.connect(
-        host=db_host,
-        user=db_user,
-        password=db_password,
-        database=db_name
+        host=host,
+        user=user,
+        password=password,
+        database=database
     )
     cursor = db.cursor()
     sql_update_query = """UPDATE teamkills SET deaths = 0"""
 
     msg = ""
 
-    if (pass == wipe_password):
+    if (password == wipe_password):
         cursor.execute(sql_update_query)
         msg = "WIPEEEEEEE"
     else:
@@ -140,15 +144,15 @@ async def rename(ctx, name: str, new_name: str):
     # await ctx.message.delete()
 
     db = mysql.connector.connect(
-        host=db_host,
-        user=db_user,
-        password=db_password,
-        database=db_name
+        host=host,
+        user=user,
+        password=password,
+        database=database
     )
     cursor = db.cursor()
 
     sql_select_query = """SELECT * FROM teamkills WHERE name = %s """
-    cursor.execute(sql_select_query)
+    cursor.execute(sql_select_query, (name,))
     record = cursor.fetchone()
 
     if record is not None:
@@ -174,11 +178,12 @@ def test_function():
 @bot.command()
 async def winner(ctx):
     db = mysql.connector.connect(
-        host=db_host,
-        user=db_user,
-        password=db_password,
-        database=db_name
+        host=host,
+        user=user,
+        password=password,
+        database=database
     )
+    print(86125)
     cursor = db.cursor()
 
     sql_select_query = """SELECT TOP 1 FROM teamkills ORDER BY deaths desc"""
@@ -192,12 +197,6 @@ async def winner(ctx):
     await ctx.send(msg)
     cursor.close()
 
-
-@bot.command()
-async def help(ctx):
-    """Attempts to call the help message"""
-    what()
-
 @bot.command()
 async def what(ctx):
     """Help message"""
@@ -210,4 +209,4 @@ async def what(ctx):
     
     Name and shame. NAME AND SHAME.""")
 
-bot.run('000000000')
+bot.run(os.getenv('BOT_TOKEN'))
