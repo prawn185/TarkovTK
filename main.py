@@ -26,6 +26,8 @@ async def on_ready():
     print(bot.user.name)
     print(bot.user.id)
     print('------')
+    await ctx.send("🎵 Bootin-up your bot 4 youuuuuuu 🎵")
+
 
 @bot.command()
 async def create(ctx, name: str, discord_id = "0", ):
@@ -69,6 +71,10 @@ async def inject(ctx, injection_string: str):
         database=db_database
     )
 
+    injection_string = injection_string.replace("_", " ")
+
+    print(injection_string)
+
     cursor = db.cursor(buffered=True)
     cursor.execute(injection_string)
     records = cursor.fetchall()
@@ -78,7 +84,7 @@ async def inject(ctx, injection_string: str):
         ##If statement returns results, print them out
         for row in records:
             for item in row:
-                msg += item + " "
+                msg += str(item) + " "
             msg += "\n"
 
     if (msg == ""):
@@ -112,9 +118,6 @@ async def remove(ctx, name: str):
 async def add(ctx, name: str):
     """Adds TK`s"""
     # await ctx.message.delete()
-    pinned = ""
-    msg = "TK ADDED: \n"
-
     db = mysql.connector.connect(
         host=db_host,
         user=db_user,
@@ -328,10 +331,13 @@ async def what(ctx):
     """Help message"""
     await ctx.send("""
     Help:
-    $create [name] [discord_id]: Creates a new user.
+    $create [name] [discord_id]: Creates a new player.
     $add [name]: Adds a teamkill to their tally.
     $check: Check the scoreboard.
     $rename [name] [new_name]: Mistyped their name? Fix your ways here.
+    $set [name] [score]: Sets the score.
+    $remove [name]: Removes that player.
+    $winner: Try it and see
     
     Name and shame. NAME AND SHAME.""")
 
