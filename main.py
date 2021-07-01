@@ -11,7 +11,6 @@ intents.members = True
 
 bot = commands.Bot(command_prefix='$', description=description, intents=intents)
 
-
 @bot.event
 async def on_ready():
     print('Logged in as')
@@ -19,12 +18,9 @@ async def on_ready():
     print(bot.user.id)
     print('------')
 
-
 # put into env
-
 # tarkov
 # Killa69!
-
 
 @bot.command()
 async def create(ctx, name: str, discord_id: str, ):
