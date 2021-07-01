@@ -138,7 +138,7 @@ async def wipe(ctx):
 
 @bot.command()
 async def rename(ctx, name: str, new_name: str):
-    """Renames somebody TK`s"""
+    """Renames somebody"""
     # await ctx.message.delete()
 
     db = mysql.connector.connect(
@@ -148,6 +148,7 @@ async def rename(ctx, name: str, new_name: str):
         database="Tarkov"
     )
     cursor = db.cursor()
+    
     sql_select_query = """SELECT * FROM teamkills WHERE name = %s"""
     cursor.execute(sql_select_query, (name,))
     record = cursor.fetchone()
