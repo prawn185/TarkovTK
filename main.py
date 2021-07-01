@@ -30,7 +30,7 @@ async def on_ready():
     print('------')
 
 @bot.command()
-async def create(ctx, name: str, discord_id: str, ):
+async def create(ctx, name: str, discord_id = "0", ):
     db = mysql.connector.connect(
         host=db_host,
         user=db_user,
@@ -64,20 +64,22 @@ async def add(ctx, name: str):
         database=db_database
     )
 
-    cursor = db.cursor()
+    cursor = db.cursor(buffered=True)
 
     sql_select_query = """SELECT * FROM teamkills WHERE name = %s"""
     cursor.execute(sql_select_query, (name,))
     record = cursor.fetchone()
-    sql_update_query = """UPDATE teamkills SET deaths = %s WHERE name = %s"""
-    new_kill = (record["kills"] + 1, name)
-    cursor.execute(sql_update_query, new_kill)
 
-    sql_select_query2 = """select * from teamkills where name = %s"""
-    cursor.execute(sql_select_query2, (name,))
-    updated = cursor.fetchone()
+    if record is not None:
 
-    await ctx.send("TK ADDED: \n" + name + " is now on " + str(updated["kills"]) + " Kills")
+        print(record[3])
+        sql_update_query = """UPDATE teamkills SET deaths = %s WHERE name = %s"""
+        new_kill = record[3] + 1
+        cursor.execute(sql_update_query, (new_kill, name))
+
+        await ctx.send("TK ADDED: \n" + name + " is now on " + str(new_kill) + " Kills")
+    else:
+        await ctx.send("TK Failed: \n Name does not exist.")
 
     db.commit()
     cursor.close()
@@ -102,7 +104,7 @@ async def check(ctx):
     cursor.execute(sql_select_query)
     records = cursor.fetchall()
     for row in records:
-        msg += row["name"]+": "+str(row["kills"])+"\n"
+        msg += row[1]+": "+str(row[3])+"\n"
         
     await ctx.send(msg)
 
@@ -186,11 +188,11 @@ async def winner(ctx):
     print(86125)
     cursor = db.cursor()
 
-    sql_select_query = """SELECT TOP 1 FROM teamkills ORDER BY deaths desc"""
+    sql_select_query = """SELECT * FROM teamkills ORDER BY deaths desc LIMIT 1"""
     cursor.execute(sql_select_query)
     record = cursor.fetchone()
     if record is not None:
-        msg = "As it looks, " + record["name"] + " is in the lead with a smashing " + record["kills"] + " teamkills."
+        msg = "As it looks, " + record[1] + " is in the lead with a smashing " + str(record[3]) + " teamkills."
     else:
         msg = "Nobody is here"
 
