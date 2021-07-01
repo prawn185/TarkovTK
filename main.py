@@ -26,8 +26,7 @@ async def on_ready():
     print(bot.user.name)
     print(bot.user.id)
     print('------')
-    await ctx.send("🎵 Bootin-up your bot 4 youuuuuuu 🎵")
-
+    
 
 @bot.command()
 async def create(ctx, name: str, discord_id = "0", ):
