@@ -12,10 +12,10 @@ intents.members = True
 
 load_dotenv()
 
-host = os.getenv('DB_HOST')
-user = os.getenv('DB_USER')
-password = os.getenv('DB_PASSWORD')
-database = os.getenv('DB_DATABASE')
+db_host = os.getenv('DB_HOST')
+db_user = os.getenv('DB_USER')
+db_password = os.getenv('DB_PASSWORD')
+db_database = os.getenv('DB_DATABASE')
 
 
 wipe_password = "boom"
@@ -32,10 +32,10 @@ async def on_ready():
 @bot.command()
 async def create(ctx, name: str, discord_id: str, ):
     db = mysql.connector.connect(
-        host=host,
-        user=user,
-        password=password,
-        database=database
+        host=db_host,
+        user=db_user,
+        password=db_password,
+        database=db_database
     )
 
     mysql_insert_query = """INSERT INTO teamkills (`name`, `discord_id`, `deaths`) 
@@ -58,10 +58,10 @@ async def add(ctx, name: str):
     msg = "TK ADDED: \n"
 
     db = mysql.connector.connect(
-        host=host,
-        user=user,
-        password=password,
-        database=database
+        host=db_host,
+        user=db_user,
+        password=db_password,
+        database=db_database
     )
 
     cursor = db.cursor()
@@ -90,10 +90,10 @@ async def check(ctx):
     msg = "TeamKillers: \n"
 
     db = mysql.connector.connect(
-        host=host,
-        user=user,
-        password=password,
-        database=database
+        host=db_host,
+        user=db_user,
+        password=db_password,
+        database=db_database
     )
 
     cursor = db.cursor()
@@ -115,10 +115,10 @@ async def wipe(ctx, password: str):
     """Wipe TK`s"""
     # await ctx.message.delete()
     db = mysql.connector.connect(
-        host=host,
-        user=user,
-        password=password,
-        database=database
+        host=db_host,
+        user=db_user,
+        password=db_password,
+        database=db_database
     )
     cursor = db.cursor()
     sql_update_query = """UPDATE teamkills SET deaths = 0"""
@@ -144,10 +144,10 @@ async def rename(ctx, name: str, new_name: str):
     # await ctx.message.delete()
 
     db = mysql.connector.connect(
-        host=host,
-        user=user,
-        password=password,
-        database=database
+        host=db_host,
+        user=db_user,
+        password=db_password,
+        database=db_database
     )
     cursor = db.cursor()
 
@@ -178,10 +178,10 @@ def test_function():
 @bot.command()
 async def winner(ctx):
     db = mysql.connector.connect(
-        host=host,
-        user=user,
-        password=password,
-        database=database
+        host=db_host,
+        user=db_user,
+        password=db_password,
+        database=db_database
     )
     print(86125)
     cursor = db.cursor()
