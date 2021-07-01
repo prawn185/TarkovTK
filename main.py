@@ -9,6 +9,11 @@ There are a number of utility commands being showcased here.'''
 intents = discord.Intents.default()
 intents.members = True
 
+db_host = "localhost"
+db_user = "tarkov"
+db_password = "Killa69!"
+db_name = "Tarkov"
+
 bot = commands.Bot(command_prefix='$', description=description, intents=intents)
 
 @bot.event
@@ -18,27 +23,13 @@ async def on_ready():
     print(bot.user.id)
     print('------')
 
-# put into env
-# tarkov
-# Killa69!
-
-@bot.event
-def db_connect():
-    db = mysql.connector.connect(
-        host="localhost",
-        user="tarkov",
-        password="Killa69!",
-        database="Tarkov"
-    )
-
-
 @bot.command()
 async def create(ctx, name: str, discord_id: str, ):
     db = mysql.connector.connect(
-        host="localhost",
-        user="tarkov",
-        password="Killa69!",
-        database="Tarkov"
+        host=db_host,
+        user=db_user,
+        password=db_password,
+        database=db_name
     )
 
     mysql_insert_query = """INSERT INTO teamkills (`name`, `discord_id`, `deaths`) 
@@ -64,10 +55,10 @@ async def add(ctx, name: str):
     msg = "TK ADDED: \n"
 
     db = mysql.connector.connect(
-        host="localhost",
-        user="tarkov",
-        password="Killa69!",
-        database="Tarkov"
+        host=db_host,
+        user=db_user,
+        password=db_password,
+        database=db_name
     )
 
     cursor = db.cursor()
@@ -96,10 +87,10 @@ async def check(ctx):
     msg = "TeamKillers: \n"
 
     db = mysql.connector.connect(
-        host="localhost",
-        user="tarkov",
-        password="Killa69!",
-        database="Tarkov"
+        host=db_host,
+        user=db_user,
+        password=db_password,
+        database=db_name
     )
 
     cursor = db.cursor()
@@ -121,10 +112,10 @@ async def wipe(ctx):
     """Wipe TK`s"""
     # await ctx.message.delete()
     db = mysql.connector.connect(
-        host="localhost",
-        user="tarkov",
-        password="Killa69!",
-        database="Tarkov"
+        host=db_host,
+        user=db_user,
+        password=db_password,
+        database=db_name
     )
     cursor = db.cursor()
     sql_update_query = """UPDATE teamkills SET deaths = 0"""
@@ -142,13 +133,13 @@ async def rename(ctx, name: str, new_name: str):
     # await ctx.message.delete()
 
     db = mysql.connector.connect(
-        host="localhost",
-        user="tarkov",
-        password="Killa69!",
-        database="Tarkov"
+        host=db_host,
+        user=db_user,
+        password=db_password,
+        database=db_name
     )
     cursor = db.cursor()
-    
+
     sql_select_query = """SELECT * FROM teamkills WHERE name = %s"""
     cursor.execute(sql_select_query, (name,))
     record = cursor.fetchone()
@@ -177,7 +168,7 @@ async def what(ctx):
     Help:
     $create [name] [discord_id]: Creates a new user.
     $add [name]: Adds a teamkill to their tally.
-    $check: Check the scoreboard
+    $check: Check the scoreboard.
     $rename [name] [new_name]: Mistyped their name? Fix your ways here.
     
     Name and shame. NAME AND SHAME.""")
