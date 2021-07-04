@@ -24,7 +24,7 @@ db_database = os.getenv('DB_DATABASE')
 
 wipe_password = "boom"
 
-bot = commands.Bot(command_prefix='$', description=description, intents=intents)
+bot = commands.Bot(command_prefix='!', description=description, intents=intents)
 
 
 @bot.event
