@@ -8,6 +8,6 @@ CREATE TABLE `teamkills` (
   `name` varchar(254) DEFAULT NULL,
   `discord_id` varchar(255) DEFAULT NULL,
   `deaths` int DEFAULT NULL,
-  `guild_id` int DEFAULT NULL,
+  `guild_id` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) 

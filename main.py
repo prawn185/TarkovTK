@@ -60,17 +60,15 @@ async def create(ctx, name: str, discord_id="0", ):
     )
     cursor = await conn.cursor()
 
-    sql_select_query = """SELECT * FROM teamkills WHERE name = %s"""
-    await cursor.execute(sql_select_query, (name,))
+    sql_select_query = """SELECT * FROM teamkills WHERE name = %s AND guild_id = %s"""
+    await cursor.execute(sql_select_query, (name, ctx.message.guild.id))
     record = await cursor.fetchone()
     msg = ""
 
     if record is None:
-        mysql_insert_query = """INSERT INTO teamkills (`name`, `discord_id`, `deaths`) 
-                                VALUES (%s, %s, %s) """
-        record = (name, discord_id, 0)
-        cursor = conn.cursor()
-        await cursor.execute(mysql_insert_query, record)
+        mysql_insert_query = """INSERT INTO teamkills (`name`, `discord_id`, `deaths`, `guild_id`)
+                                VALUES (%s, %s, %s, %s) """
+        await cursor.execute(mysql_insert_query, (name, discord_id, 0, ctx.message.guild.id))
         msg = name + " added! Welcome to the Thunderdome."
     else:
         msg = "This guy already exists"
@@ -125,8 +123,8 @@ async def remove(ctx, name: str):
     )
     cursor = await conn.cursor()
 
-    sql_select_query = """DELETE FROM teamkills WHERE name = %s"""
-    await cursor.execute(sql_select_query, (name,))
+    sql_select_query = """DELETE FROM teamkills WHERE name = %s AND guild_id = %s"""
+    await cursor.execute(sql_select_query, (name, ctx.message.guild.id))
 
     await ctx.send("OK - done")
 
@@ -146,18 +144,16 @@ async def add(ctx, name: str):
     )
     cursor = await conn.cursor()
 
-    sql_select_query = """SELECT * FROM teamkills WHERE name = %s"""
-    await cursor.execute(sql_select_query, (name,))
+    sql_select_query = """SELECT * FROM teamkills WHERE name = %s AND guild_id = %s"""
+    await cursor.execute(sql_select_query, (name, ctx.message.guild.id))
     record = await cursor.fetchone()
 
     msg = ""
 
     if record is not None:
-
-        print(record[3])
-        sql_update_query = """UPDATE teamkills SET deaths = %s WHERE name = %s"""
+        sql_update_query = """UPDATE teamkills SET deaths = %s WHERE name = %s AND guild_id = %s"""
         new_kill = record[3] + 1
-        await cursor.execute(sql_update_query, (new_kill, name))
+        await cursor.execute(sql_update_query, (new_kill, name, ctx.message.guild.id))
 
         msg = "TK ADDED: \n" + name + " is now on " + str(new_kill) + " Kills"
     else:
@@ -181,16 +177,16 @@ async def set(ctx, name: str, num: int):
     )
     cursor = await conn.cursor()
 
-    sql_select_query = """SELECT * FROM teamkills WHERE name = %s"""
-    await cursor.execute(sql_select_query, (name,))
+    sql_select_query = """SELECT * FROM teamkills WHERE name = %s AND guild_id = %s"""
+    await cursor.execute(sql_select_query, (name, ctx.message.guild.id))
     record = await cursor.fetchone()
 
     msg = ""
 
     if record is not None:
         cursor = await conn.cursor()
-        sql_select_query = """UPDATE teamkills SET deaths = %s WHERE name = %s"""
-        await cursor.execute(sql_select_query, (num, name))
+        sql_select_query = """UPDATE teamkills SET deaths = %s WHERE name = %s AND guild_id = %s"""
+        await cursor.execute(sql_select_query, (num, name, ctx.message.guild.id))
         msg = "SCORE SET: \n" + name + " is now on " + str(num) + " Kills"
     else:
         msg = "Person doesn't exist, didn't do anything."
@@ -214,8 +210,8 @@ async def get(ctx, name: str):
     )
     cursor = await conn.cursor()
 
-    sql_select_query = """SELECT * FROM teamkills WHERE name = %s """
-    await cursor.execute(sql_select_query, (name,))
+    sql_select_query = """SELECT * FROM teamkills WHERE name = %s AND guild_id = %s"""
+    await cursor.execute(sql_select_query, (name, ctx.message.guild.id))
     record = await cursor.fetchone()
 
     msg = ""
@@ -242,15 +238,15 @@ async def check(ctx):
         password=db_password,
         db=db_database,
     )
-    print("It works locally")
     cursor = await conn.cursor()
 
-    sql_select_query = """SELECT * FROM teamkills"""
-    await cursor.execute(sql_select_query)
-    records = cursor.fetchall()
+    sql_select_query = """SELECT * FROM teamkills where guild_id = %s"""
+    await cursor.execute(sql_select_query, (ctx.message.guild.id, ))
+    records = await cursor.fetchall()
+    print("Fetching teamkillers list")
     msg = "TeamKillers: \n"
     for row in records:
-        msg += row[1]+": "+str(row[3])+"\n"
+        msg += row[1] + ": " + str(row[3]) + "\n"
 
     await ctx.send(msg)
 
@@ -269,12 +265,12 @@ async def wipe(ctx, password: str):
         db=db_database,
     )
     cursor = await conn.cursor()
-    sql_update_query = """UPDATE teamkills SET deaths = 0"""
+    sql_update_query = """UPDATE teamkills SET deaths = 0 WHERE guild_id = %s"""
 
     msg = ""
 
     if password == wipe_password:
-        await cursor.execute(sql_update_query)
+        await cursor.execute(sql_update_query, (ctx.message.guild.id, ))
         msg = "WIPEEEEEEED"
     else:
         msg = "Password incorrect - You'll need it to perform a wipe."
@@ -298,14 +294,13 @@ async def rename(ctx, name: str, new_name: str):
     )
     cursor = await conn.cursor()
 
-    sql_select_query = """SELECT * FROM teamkills WHERE name = %s """
-    await cursor.execute(sql_select_query, (name,))
+    sql_select_query = """SELECT * FROM teamkills WHERE name = %s AND guild_id = %s"""
+    await cursor.execute(sql_select_query, (name, ctx.message.guild.id))
     record = await cursor.fetchone()
 
     if record is not None:
-        sql_update_query = """UPDATE teamkills SET name = %s WHERE name = %s"""
-        name_tuple = (new_name, name)
-        await cursor.execute(sql_update_query, name_tuple)
+        sql_update_query = """UPDATE teamkills SET name = %s WHERE name = %s AND guild_id = %s"""
+        await cursor.execute(sql_update_query, (new_name, name, ctx.message.guild.id))
         await ctx.send("RENAMED: \n" + name + " is now called " + new_name + ".")
     else:
         await ctx.send("You numpty, " + name + " doesn't even exist. Use '!add " + name + "' to add them.")
@@ -331,8 +326,8 @@ async def winner(ctx):
     )
     cursor = await conn.cursor()
 
-    sql_select_query = """SELECT * FROM teamkills ORDER BY deaths desc LIMIT 1"""
-    await cursor.execute(sql_select_query)
+    sql_select_query = """SELECT * FROM teamkills WHERE guild_id = %s ORDER BY deaths desc LIMIT 1"""
+    await cursor.execute(sql_select_query, (ctx.message.guild.id, ))
     record = await cursor.fetchone()
     if record is not None:
         msg = "As it looks, " + \
@@ -345,7 +340,7 @@ async def winner(ctx):
     await cursor.close()
 
 
-@bot.command()
+@ bot.command()
 async def what(ctx):
     """Help message"""
     await ctx.send("""
@@ -357,7 +352,7 @@ async def what(ctx):
     !set [name] [score]: Sets the score.
     !remove [name]: Removes that player.
     !winner: Try it and see.
-    
+
     Name and shame. NAME AND SHAME.""")
 
 
@@ -396,7 +391,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
         self.title = data.get('title')
         self.url = data.get('url')
 
-    @classmethod
+    @ classmethod
     async def from_url(cls, url, *, loop=None, stream=False):
         loop = loop or asyncio.get_event_loop()
         data = await loop.run_in_executor(None, lambda: ytdl.extract_info(url, download=not stream))
@@ -413,7 +408,7 @@ class Music(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command()
+    @ commands.command()
     async def join(self, ctx, *, channel: discord.VoiceChannel):
         """Joins a voice channel"""
 
@@ -431,7 +426,7 @@ class Music(commands.Cog):
     #
     #     await ctx.send('Now playing: {}'.format(query))
 
-    @commands.command()
+    @ commands.command()
     async def yt(self, ctx, *, url):
         """Plays from a url (almost anything youtube_dl supports)"""
 
@@ -442,7 +437,7 @@ class Music(commands.Cog):
 
         await ctx.send('Now playing: {}'.format(player.title))
 
-    @commands.command()
+    @ commands.command()
     async def play(self, ctx, *, url):
         """Streams from a url (same as yt, but doesn't predownload)"""
 
@@ -453,7 +448,7 @@ class Music(commands.Cog):
 
         await ctx.send('Now playing: {}'.format(player.title))
 
-    @commands.command()
+    @ commands.command()
     async def volume(self, ctx, volume: int):
         """Changes the player's volume"""
 
@@ -463,14 +458,14 @@ class Music(commands.Cog):
         ctx.voice_client.source.volume = volume / 100
         await ctx.send("Changed volume to {}%".format(volume))
 
-    @commands.command()
+    @ commands.command()
     async def stop(self, ctx):
         """Stops and disconnects the bot from voice"""
 
         await ctx.voice_client.disconnect()
 
-    @play.before_invoke
-    @yt.before_invoke
+    @ play.before_invoke
+    @ yt.before_invoke
     async def ensure_voice(self, ctx):
         if ctx.voice_client is None:
             if ctx.author.voice:
