@@ -184,7 +184,6 @@ async def set(ctx, name: str, num: int):
     msg = ""
 
     if record is not None:
-        cursor = await conn.cursor()
         sql_select_query = """UPDATE teamkills SET deaths = %s WHERE name = %s AND guild_id = %s"""
         await cursor.execute(sql_select_query, (num, name, ctx.message.guild.id))
         msg = "SCORE SET: \n" + name + " is now on " + str(num) + " Kills"
