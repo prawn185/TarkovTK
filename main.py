@@ -6,7 +6,6 @@ import youtube_dl
 
 from discord.ext import commands
 
-#import mysql.connector
 import aiomysql  # async db
 
 from dotenv import load_dotenv
@@ -211,7 +210,7 @@ async def get(ctx, name: str):
         msg = record[1] + " is on " + str(record[3]) + " kills."
     else:
         msg = "You numpty, " + name + \
-            " doesn't even exist. Use '$add " + name + "' to add them."
+            " doesn't even exist. Use '!add " + name + "' to add them."
 
     await ctx.send(msg)
 
@@ -294,7 +293,7 @@ async def rename(ctx, name: str, new_name: str):
         await cursor.execute(sql_update_query, name_tuple)
         await ctx.send("RENAMED: \n" + name + " is now called " + new_name + ".")
     else:
-        await ctx.send("You numpty, " + name + " doesn't even exist. Use '$add " + name + "' to add them.")
+        await ctx.send("You numpty, " + name + " doesn't even exist. Use '!add " + name + "' to add them.")
 
     await conn.commit()
     await cursor.close()
@@ -336,13 +335,13 @@ async def what(ctx):
     """Help message"""
     await ctx.send("""
     Help:
-    $create [name] [discord_id]: Creates a new player.
-    $add [name]: Adds a teamkill to their tally.
-    $check: Check the scoreboard.
-    $rename [name] [new_name]: Mistyped their name? Fix your ways here.
-    $set [name] [score]: Sets the score.
-    $remove [name]: Removes that player.
-    $winner: Try it and see.
+    !create [name] [discord_id]: Creates a new player.
+    !add [name]: Adds a teamkill to their tally.
+    !check: Check the scoreboard.
+    !rename [name] [new_name]: Mistyped their name? Fix your ways here.
+    !set [name] [score]: Sets the score.
+    !remove [name]: Removes that player.
+    !winner: Try it and see.
     
     Name and shame. NAME AND SHAME.""")
 
