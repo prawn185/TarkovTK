@@ -6,7 +6,8 @@ import youtube_dl
 
 from discord.ext import commands
 
-import mysql.connector
+#import mysql.connector
+import aiomysql  # async db
 
 from dotenv import load_dotenv
 
@@ -38,52 +39,51 @@ async def on_ready():
 
 @bot.command()
 async def create(ctx, name: str, discord_id="0", ):
-    db = mysql.connector.connect(
+    conn = await aiomysql.connect(
         host=db_host,
         user=db_user,
         password=db_password,
-        database=db_database
+        db=db_database,
     )
-
-    cursor = db.cursor(buffered=True)
+    cursor = await conn.cursor(buffered=True)
 
     sql_select_query = """SELECT * FROM teamkills WHERE name = %s"""
-    cursor.execute(sql_select_query, (name,))
-    record = cursor.fetchone()
+    await cursor.execute(sql_select_query, (name,))
+    record = await cursor.fetchone()
     msg = ""
 
     if record is None:
         mysql_insert_query = """INSERT INTO teamkills (`name`, `discord_id`, `deaths`) 
                                 VALUES (%s, %s, %s) """
         record = (name, discord_id, 0)
-        cursor = db.cursor()
-        cursor.execute(mysql_insert_query, record)
+        cursor = conn.cursor()
+        await cursor.execute(mysql_insert_query, record)
         msg = name + " added! Welcome to the Thunderdome."
     else:
         msg = "This guy already exists"
 
     await ctx.send(msg)
 
-    db.commit()
-    cursor.close()
+    await conn.commit()
+    await cursor.close()
 
 
 @bot.command()
 async def inject(ctx, injection_string: str):
     # Johnny Tables
-    db = mysql.connector.connect(
+    conn = await aiomysql.connect(
         host=db_host,
         user=db_user,
         password=db_password,
-        database=db_database
+        db=db_database,
     )
+    cursor = await conn.cursor(buffered=True)
 
     injection_string = injection_string.replace("_", " ")
 
-    print(injection_string)
+    print("We're about to inject:\n" + injection_string)
 
-    cursor = db.cursor(buffered=True)
-    cursor.execute(injection_string)
+    await cursor.execute(injection_string)
     records = cursor.fetchall()
     msg = ""
 
@@ -98,45 +98,44 @@ async def inject(ctx, injection_string: str):
         msg = "Done!"
 
     await ctx.send(msg)
-    db.commit()
-    cursor.close()
+    await conn.commit()
+    await cursor.close()
 
 
 @bot.command()
 async def remove(ctx, name: str):
-    db = mysql.connector.connect(
+    conn = await aiomysql.connect(
         host=db_host,
         user=db_user,
         password=db_password,
-        database=db_database
+        db=db_database,
     )
-    cursor = db.cursor(buffered=True)
+    cursor = await conn.cursor(buffered=True)
 
     sql_select_query = """DELETE FROM teamkills WHERE name = %s"""
-    cursor.execute(sql_select_query, (name,))
+    await cursor.execute(sql_select_query, (name,))
 
     await ctx.send("OK - done")
 
-    db.commit()
-    cursor.close()
+    await conn.commit()
+    await cursor.close()
 
 
 @bot.command()
 async def add(ctx, name: str):
     """Adds TK`s"""
     # await ctx.message.delete()
-    db = mysql.connector.connect(
+    conn = await aiomysql.connect(
         host=db_host,
         user=db_user,
         password=db_password,
-        database=db_database
+        db=db_database,
     )
-
-    cursor = db.cursor(buffered=True)
+    cursor = await conn.cursor(buffered=True)
 
     sql_select_query = """SELECT * FROM teamkills WHERE name = %s"""
-    cursor.execute(sql_select_query, (name,))
-    record = cursor.fetchone()
+    await cursor.execute(sql_select_query, (name,))
+    record = await cursor.fetchone()
 
     msg = ""
 
@@ -145,7 +144,7 @@ async def add(ctx, name: str):
         print(record[3])
         sql_update_query = """UPDATE teamkills SET deaths = %s WHERE name = %s"""
         new_kill = record[3] + 1
-        cursor.execute(sql_update_query, (new_kill, name))
+        await cursor.execute(sql_update_query, (new_kill, name))
 
         msg = "TK ADDED: \n" + name + " is now on " + str(new_kill) + " Kills"
     else:
@@ -153,33 +152,32 @@ async def add(ctx, name: str):
 
     await ctx.send(msg)
 
-    db.commit()
-    cursor.close()
+    await conn.commit()
+    await cursor.close()
 
 
 @bot.command()
 async def set(ctx, name: str, num: int):
     """Sets the score"""
     # await ctx.message.delete()
-    db = mysql.connector.connect(
+    conn = await aiomysql.connect(
         host=db_host,
         user=db_user,
         password=db_password,
-        database=db_database
+        db=db_database,
     )
-
-    cursor = db.cursor(buffered=True)
+    cursor = await conn.cursor(buffered=True)
 
     sql_select_query = """SELECT * FROM teamkills WHERE name = %s"""
-    cursor.execute(sql_select_query, (name,))
-    record = cursor.fetchone()
+    await cursor.execute(sql_select_query, (name,))
+    record = await cursor.fetchone()
 
     msg = ""
 
     if record is not None:
-        cursor = db.cursor(buffered=True)
+        cursor = await conn.cursor(buffered=True)
         sql_select_query = """UPDATE teamkills SET deaths = %s WHERE name = %s"""
-        cursor.execute(sql_select_query, (num, name))
+        await cursor.execute(sql_select_query, (num, name))
         msg = "SCORE SET: \n" + name + " is now on " + str(num) + " Kills"
     else:
         msg = "Person doesn't exist, didn't do anything."
@@ -187,25 +185,25 @@ async def set(ctx, name: str, num: int):
 
     await ctx.send(msg)
 
-    db.commit()
-    cursor.close()
+    await conn.commit()
+    await cursor.close()
 
 
 @bot.command()
 async def get(ctx, name: str):
     """f"""
     # await ctx.message.delete()
-    db = mysql.connector.connect(
+    conn = await aiomysql.connect(
         host=db_host,
         user=db_user,
         password=db_password,
-        database=db_database
+        db=db_database,
     )
-    cursor = db.cursor()
+    cursor = await conn.cursor(buffered=True)
 
     sql_select_query = """SELECT * FROM teamkills WHERE name = %s """
-    cursor.execute(sql_select_query, (name,))
-    record = cursor.fetchone()
+    await cursor.execute(sql_select_query, (name,))
+    record = await cursor.fetchone()
 
     msg = ""
 
@@ -217,54 +215,52 @@ async def get(ctx, name: str):
 
     await ctx.send(msg)
 
-    db.commit()
-    cursor.close()
+    await conn.commit()
+    await cursor.close()
 
 
 @bot.command()
 async def check(ctx):
     """Counts TK`s"""
     # await ctx.message.delete()
-    msg = "TeamKillers: \n"
-
-    db = mysql.connector.connect(
+    conn = await aiomysql.connect(
         host=db_host,
         user=db_user,
         password=db_password,
-        database=db_database
+        db=db_database,
     )
-
-    cursor = db.cursor()
+    cursor = await conn.cursor(buffered=True)
 
     sql_select_query = """SELECT * FROM teamkills"""
-    cursor.execute(sql_select_query)
+    await cursor.execute(sql_select_query)
     records = cursor.fetchall()
+    msg = "TeamKillers: \n"
     for row in records:
         msg += row[1]+": "+str(row[3])+"\n"
 
     await ctx.send(msg)
 
-    db.commit()
-    cursor.close()
+    await conn.commit()
+    await cursor.close()
 
 
 @bot.command()
 async def wipe(ctx, password: str):
     """Wipe TK`s"""
     await ctx.message.delete()
-    db = mysql.connector.connect(
+    conn = await aiomysql.connect(
         host=db_host,
         user=db_user,
         password=db_password,
-        database=db_database
+        db=db_database,
     )
-    cursor = db.cursor()
+    cursor = await conn.cursor(buffered=True)
     sql_update_query = """UPDATE teamkills SET deaths = 0"""
 
     msg = ""
 
     if password == wipe_password:
-        cursor.execute(sql_update_query)
+        await cursor.execute(sql_update_query)
         msg = "WIPEEEEEEED"
     else:
         msg = "Password incorrect - You'll need it to perform a wipe."
@@ -272,37 +268,36 @@ async def wipe(ctx, password: str):
 
     await ctx.send(msg)
 
-    db.commit()
-    cursor.close()
+    await conn.commit()
+    await cursor.close()
 
 
 @bot.command()
 async def rename(ctx, name: str, new_name: str):
     """Renames somebody"""
     # await ctx.message.delete()
-
-    db = mysql.connector.connect(
+    conn = await aiomysql.connect(
         host=db_host,
         user=db_user,
         password=db_password,
-        database=db_database
+        db=db_database,
     )
-    cursor = db.cursor()
+    cursor = await conn.cursor(buffered=True)
 
     sql_select_query = """SELECT * FROM teamkills WHERE name = %s """
-    cursor.execute(sql_select_query, (name,))
-    record = cursor.fetchone()
+    await cursor.execute(sql_select_query, (name,))
+    record = await cursor.fetchone()
 
     if record is not None:
         sql_update_query = """UPDATE teamkills SET name = %s WHERE name = %s"""
         name_tuple = (new_name, name)
-        cursor.execute(sql_update_query, name_tuple)
+        await cursor.execute(sql_update_query, name_tuple)
         await ctx.send("RENAMED: \n" + name + " is now called " + new_name + ".")
     else:
         await ctx.send("You numpty, " + name + " doesn't even exist. Use '$add " + name + "' to add them.")
 
-    db.commit()
-    cursor.close()
+    await conn.commit()
+    await cursor.close()
 
 
 @bot.command()
@@ -314,17 +309,17 @@ async def nigel(ctx):
 
 @bot.command()
 async def winner(ctx):
-    db = mysql.connector.connect(
+    conn = await aiomysql.connect(
         host=db_host,
         user=db_user,
         password=db_password,
-        database=db_database
+        db=db_database,
     )
-    cursor = db.cursor()
+    cursor = await conn.cursor(buffered=True)
 
     sql_select_query = """SELECT * FROM teamkills ORDER BY deaths desc LIMIT 1"""
-    cursor.execute(sql_select_query)
-    record = cursor.fetchone()
+    await cursor.execute(sql_select_query)
+    record = await cursor.fetchone()
     if record is not None:
         msg = "As it looks, " + \
             record[1] + " is in the lead with a smashing " + \
@@ -333,7 +328,7 @@ async def winner(ctx):
         msg = "Nobody is here"
 
     await ctx.send(msg)
-    cursor.close()
+    await cursor.close()
 
 
 @bot.command()
@@ -475,6 +470,5 @@ class Music(commands.Cog):
 
 
 bot.add_cog(Music(bot))
-
 
 bot.run(os.getenv('BOT_TOKEN'))
