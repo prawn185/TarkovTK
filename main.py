@@ -30,10 +30,24 @@ bot = commands.Bot(command_prefix='!',
 
 @bot.event
 async def on_ready():
+    print('------')
     print('Logged in as')
     print(bot.user.name)
     print(bot.user.id)
     print('------')
+
+
+@bot.command()
+async def printout(ctx):
+    """Check that it works"""
+    # ctx (context) object
+    # details available at https://discordpy.readthedocs.io/en/rewrite/ext/commands/api.html#context
+    #   https://discordpy.readthedocs.io/en/stable/api.html#guild
+    #   https://discordpy.readthedocs.io/en/stable/api.html#message
+    print("It works!")
+    await ctx.send("It works!")
+    # await ctx.send(ctx.message.guild)
+    await ctx.send(ctx.message.guild.id)
 
 
 @bot.command()
@@ -44,7 +58,7 @@ async def create(ctx, name: str, discord_id="0", ):
         password=db_password,
         db=db_database,
     )
-    cursor = await conn.cursor(buffered=True)
+    cursor = await conn.cursor()
 
     sql_select_query = """SELECT * FROM teamkills WHERE name = %s"""
     await cursor.execute(sql_select_query, (name,))
@@ -76,7 +90,7 @@ async def inject(ctx, injection_string: str):
         password=db_password,
         db=db_database,
     )
-    cursor = await conn.cursor(buffered=True)
+    cursor = await conn.cursor()
 
     injection_string = injection_string.replace("_", " ")
 
@@ -109,7 +123,7 @@ async def remove(ctx, name: str):
         password=db_password,
         db=db_database,
     )
-    cursor = await conn.cursor(buffered=True)
+    cursor = await conn.cursor()
 
     sql_select_query = """DELETE FROM teamkills WHERE name = %s"""
     await cursor.execute(sql_select_query, (name,))
@@ -130,7 +144,7 @@ async def add(ctx, name: str):
         password=db_password,
         db=db_database,
     )
-    cursor = await conn.cursor(buffered=True)
+    cursor = await conn.cursor()
 
     sql_select_query = """SELECT * FROM teamkills WHERE name = %s"""
     await cursor.execute(sql_select_query, (name,))
@@ -165,7 +179,7 @@ async def set(ctx, name: str, num: int):
         password=db_password,
         db=db_database,
     )
-    cursor = await conn.cursor(buffered=True)
+    cursor = await conn.cursor()
 
     sql_select_query = """SELECT * FROM teamkills WHERE name = %s"""
     await cursor.execute(sql_select_query, (name,))
@@ -174,7 +188,7 @@ async def set(ctx, name: str, num: int):
     msg = ""
 
     if record is not None:
-        cursor = await conn.cursor(buffered=True)
+        cursor = await conn.cursor()
         sql_select_query = """UPDATE teamkills SET deaths = %s WHERE name = %s"""
         await cursor.execute(sql_select_query, (num, name))
         msg = "SCORE SET: \n" + name + " is now on " + str(num) + " Kills"
@@ -198,7 +212,7 @@ async def get(ctx, name: str):
         password=db_password,
         db=db_database,
     )
-    cursor = await conn.cursor(buffered=True)
+    cursor = await conn.cursor()
 
     sql_select_query = """SELECT * FROM teamkills WHERE name = %s """
     await cursor.execute(sql_select_query, (name,))
@@ -228,7 +242,8 @@ async def check(ctx):
         password=db_password,
         db=db_database,
     )
-    cursor = await conn.cursor(buffered=True)
+    print("It works locally")
+    cursor = await conn.cursor()
 
     sql_select_query = """SELECT * FROM teamkills"""
     await cursor.execute(sql_select_query)
@@ -253,7 +268,7 @@ async def wipe(ctx, password: str):
         password=db_password,
         db=db_database,
     )
-    cursor = await conn.cursor(buffered=True)
+    cursor = await conn.cursor()
     sql_update_query = """UPDATE teamkills SET deaths = 0"""
 
     msg = ""
@@ -281,7 +296,7 @@ async def rename(ctx, name: str, new_name: str):
         password=db_password,
         db=db_database,
     )
-    cursor = await conn.cursor(buffered=True)
+    cursor = await conn.cursor()
 
     sql_select_query = """SELECT * FROM teamkills WHERE name = %s """
     await cursor.execute(sql_select_query, (name,))
@@ -314,7 +329,7 @@ async def winner(ctx):
         password=db_password,
         db=db_database,
     )
-    cursor = await conn.cursor(buffered=True)
+    cursor = await conn.cursor()
 
     sql_select_query = """SELECT * FROM teamkills ORDER BY deaths desc LIMIT 1"""
     await cursor.execute(sql_select_query)
