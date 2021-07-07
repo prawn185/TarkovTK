@@ -95,7 +95,7 @@ async def inject(ctx, injection_string: str):
     print("We're about to inject:\n" + injection_string)
 
     await cursor.execute(injection_string)
-    records = cursor.fetchall()
+    records = await cursor.fetchall()
     msg = ""
 
     if records is not None:
