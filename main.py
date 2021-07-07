@@ -21,6 +21,8 @@ db_host = os.getenv('DB_HOST')
 db_user = os.getenv('DB_USER')
 db_password = os.getenv('DB_PASSWORD')
 db_database = os.getenv('DB_DATABASE')
+db_admin_whitelist = [str(i) for i in os.environ.get(
+    "DB_ADMIN_WHITELIST").split(",")]
 
 wipe_password = "boom"
 
@@ -90,7 +92,9 @@ async def inject(ctx, injection_string: str):
     )
     cursor = await conn.cursor()
 
-    injection_string = injection_string.replace("_", " ")
+    if not (str(ctx.message.author.id) in db_admin_whitelist):
+        print("Invalid user - Injection command cancelled.")
+        return
 
     print("We're about to inject:\n" + injection_string)
 
