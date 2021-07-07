@@ -6,7 +6,9 @@ import youtube_dl
 
 from discord.ext import commands
 
+
 import aiomysql  # async db
+
 
 from dotenv import load_dotenv
 
@@ -24,8 +26,10 @@ db_database = os.getenv('DB_DATABASE')
 
 wipe_password = "boom"
 
+
 bot = commands.Bot(command_prefix='!',
                    description=description, intents=intents)
+
 
 
 @bot.event
@@ -38,6 +42,7 @@ async def on_ready():
 
 
 @bot.command()
+
 async def printout(ctx):
     """Check that it works"""
     # ctx (context) object
@@ -53,6 +58,7 @@ async def printout(ctx):
 @bot.command()
 async def create(ctx, name: str, discord_id="0", ):
     conn = await aiomysql.connect(
+
         host=db_host,
         user=db_user,
         password=db_password,
@@ -75,14 +81,18 @@ async def create(ctx, name: str, discord_id="0", ):
 
     await ctx.send(msg)
 
+
     await conn.commit()
     await cursor.close()
+
 
 
 @bot.command()
 async def inject(ctx, injection_string: str):
     # Johnny Tables
+
     conn = await aiomysql.connect(
+
         host=db_host,
         user=db_user,
         password=db_password,
@@ -218,8 +228,10 @@ async def get(ctx, name: str):
     if record is not None:
         msg = record[1] + " is on " + str(record[3]) + " kills."
     else:
+
         msg = "You numpty, " + name + \
             " doesn't even exist. Use '!add " + name + "' to add them."
+
 
     await ctx.send(msg)
 
@@ -269,7 +281,9 @@ async def wipe(ctx, password: str):
     msg = ""
 
     if password == wipe_password:
+
         await cursor.execute(sql_update_query, (ctx.message.guild.id, ))
+
         msg = "WIPEEEEEEED"
     else:
         msg = "Password incorrect - You'll need it to perform a wipe."
@@ -302,10 +316,12 @@ async def rename(ctx, name: str, new_name: str):
         await cursor.execute(sql_update_query, (new_name, name, ctx.message.guild.id))
         await ctx.send("RENAMED: \n" + name + " is now called " + new_name + ".")
     else:
+
         await ctx.send("You numpty, " + name + " doesn't even exist. Use '!add " + name + "' to add them.")
 
     await conn.commit()
     await cursor.close()
+
 
 
 @bot.command()
@@ -344,6 +360,7 @@ async def what(ctx):
     """Help message"""
     await ctx.send("""
     Help:
+
     !create [name] [discord_id]: Creates a new player.
     !add [name]: Adds a teamkill to their tally.
     !check: Check the scoreboard.
@@ -358,7 +375,6 @@ async def what(ctx):
 # Suppress noise about console usage from errors
 youtube_dl.utils.bug_reports_message = lambda: ''
 
-
 ytdl_format_options = {
     'format': 'bestaudio/best',
     'outtmpl': '%(extractor)s-%(id)s-%(title)s.%(ext)s',
@@ -370,8 +386,10 @@ ytdl_format_options = {
     'quiet': True,
     'no_warnings': True,
     'default_search': 'auto',
+
     # bind to ipv4 since ipv6 addresses cause issues sometimes
     'source_address': '0.0.0.0'
+
 }
 
 ffmpeg_options = {
@@ -390,7 +408,9 @@ class YTDLSource(discord.PCMVolumeTransformer):
         self.title = data.get('title')
         self.url = data.get('url')
 
+
     @ classmethod
+
     async def from_url(cls, url, *, loop=None, stream=False):
         loop = loop or asyncio.get_event_loop()
         data = await loop.run_in_executor(None, lambda: ytdl.extract_info(url, download=not stream))
@@ -407,7 +427,9 @@ class Music(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+
     @ commands.command()
+
     async def join(self, ctx, *, channel: discord.VoiceChannel):
         """Joins a voice channel"""
 
@@ -415,6 +437,7 @@ class Music(commands.Cog):
             return await ctx.voice_client.move_to(channel)
 
         await channel.connect()
+
 
     # @commands.command()
     # async def play(self, ctx, *, query):
@@ -437,17 +460,20 @@ class Music(commands.Cog):
         await ctx.send('Now playing: {}'.format(player.title))
 
     @ commands.command()
+
     async def play(self, ctx, *, url):
         """Streams from a url (same as yt, but doesn't predownload)"""
 
         async with ctx.typing():
             player = await YTDLSource.from_url(url, loop=self.bot.loop, stream=True)
+
             ctx.voice_client.play(player, after=lambda e: print(
                 'Player error: %s' % e) if e else None)
 
         await ctx.send('Now playing: {}'.format(player.title))
 
     @ commands.command()
+
     async def volume(self, ctx, volume: int):
         """Changes the player's volume"""
 
@@ -457,22 +483,28 @@ class Music(commands.Cog):
         ctx.voice_client.source.volume = volume / 100
         await ctx.send("Changed volume to {}%".format(volume))
 
+
     @ commands.command()
+
     async def stop(self, ctx):
         """Stops and disconnects the bot from voice"""
 
         await ctx.voice_client.disconnect()
 
+
     @ play.before_invoke
     @ yt.before_invoke
+
     async def ensure_voice(self, ctx):
         if ctx.voice_client is None:
             if ctx.author.voice:
                 await ctx.author.voice.channel.connect()
             else:
                 await ctx.send("You are not connected to a voice channel.")
+
                 raise commands.CommandError(
                     "Author not connected to a voice channel.")
+
         elif ctx.voice_client.is_playing():
             ctx.voice_client.stop()
 
