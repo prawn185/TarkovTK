@@ -126,7 +126,7 @@ class Teamkiller(commands.Cog):
 
     @ commands.command()
     async def remove(self, ctx, name: str):
-        """Remove a name from the list"""
+        """[name] - Remove a name from the list"""
         conn = await aiomysql.connect(
             host=db_host,
             user=db_user,
@@ -145,7 +145,7 @@ class Teamkiller(commands.Cog):
 
     @ commands.command()
     async def add(self, ctx, name: str):
-        """Someone TK'd? Add to their tally with this."""
+        """[name] - Someone TK'd? Add to their tally with this."""
         # await ctx.message.delete()
         conn = await aiomysql.connect(
             host=db_host,
@@ -178,7 +178,7 @@ class Teamkiller(commands.Cog):
 
     @ commands.command()
     async def set(self, ctx, name: str, num: int):
-        """Sets the score"""
+        """[name], [number] - Sets the score"""
         # await ctx.message.delete()
         conn = await aiomysql.connect(
             host=db_host,
@@ -209,7 +209,7 @@ class Teamkiller(commands.Cog):
 
     @ commands.command()
     async def get(self, ctx, name: str):
-        """Find your score"""
+        """[name] - Find your score"""
         # await ctx.message.delete()
         conn = await aiomysql.connect(
             host=db_host,
@@ -264,7 +264,7 @@ class Teamkiller(commands.Cog):
 
     @ commands.command()
     async def wipe(self, ctx, password: str):
-        """Wipe TKs"""
+        """[???] - Wipe TKs"""
         await ctx.message.delete()
         conn = await aiomysql.connect(
             host=db_host,
@@ -293,7 +293,7 @@ class Teamkiller(commands.Cog):
 
     @ commands.command()
     async def rename(self, ctx, name: str, new_name: str):
-        """Renames somebody"""
+        """[name], [new_name] - Renames somebody"""
         # await ctx.message.delete()
         conn = await aiomysql.connect(
             host=db_host,
