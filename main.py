@@ -171,7 +171,11 @@ async def add(ctx, name: str):
 
         msg = "TK ADDED: \n" + name + " is now on " + str(new_kill) + " Kills"
     else:
-        msg = "TK Failed: \n Name does not exist."
+        mysql_insert_query = """INSERT INTO teamkills (`name`, `deaths`, `guild_id`)
+                                VALUES (%s, %s, %s) """
+        await cursor.execute(mysql_insert_query, (name, 0, ctx.message.guild.id))
+        msg = name + " does not exist, added instead! Welcome to the Thunderdome."
+
 
     await ctx.send(msg)
 
@@ -255,7 +259,7 @@ async def check(ctx):
     )
     cursor = await conn.cursor()
 
-    sql_select_query = """SELECT * FROM teamkills where guild_id = %s"""
+    sql_select_query = """SELECT * FROM teamkills where guild_id = %s ORDER BY deaths DESC"""
     await cursor.execute(sql_select_query, (ctx.message.guild.id, ))
     records = await cursor.fetchall()
     print("Fetching teamkillers list")
