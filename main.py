@@ -6,13 +6,11 @@ import youtube_dl
 
 from discord.ext import commands
 
-
 import aiomysql  # async db
-
 
 from dotenv import load_dotenv
 
-description = '''m4x5ton Discord's best bot evr.'''
+description = '''Shaun & Sean's Mechanized Commander'''
 
 intents = discord.Intents.default()
 intents.members = True
@@ -28,10 +26,8 @@ db_admin_whitelist = [str(i) for i in os.environ.get(
 
 wipe_password = "boom"
 
-
 bot = commands.Bot(command_prefix='!',
                    description=description, intents=intents)
-
 
 
 @bot.event
@@ -44,7 +40,6 @@ async def on_ready():
 
 
 @bot.command()
-
 async def printout(ctx):
     """Check that it works"""
     # ctx (context) object
@@ -83,10 +78,8 @@ async def create(ctx, name: str, discord_id="0", ):
 
     await ctx.send(msg)
 
-
     await conn.commit()
     await cursor.close()
-
 
 
 @bot.command()
@@ -176,7 +169,6 @@ async def add(ctx, name: str):
         await cursor.execute(mysql_insert_query, (name, 0, ctx.message.guild.id))
         msg = name + " does not exist, added instead! Welcome to the Thunderdome."
 
-
     await ctx.send(msg)
 
     await conn.commit()
@@ -238,8 +230,7 @@ async def get(ctx, name: str):
     else:
 
         msg = "You numpty, " + name + \
-            " doesn't even exist. Use '!add " + name + "' to add them."
-
+              " doesn't even exist. Use '!add " + name + "' to add them."
 
     await ctx.send(msg)
 
@@ -260,7 +251,7 @@ async def check(ctx):
     cursor = await conn.cursor()
 
     sql_select_query = """SELECT * FROM teamkills where guild_id = %s ORDER BY deaths DESC"""
-    await cursor.execute(sql_select_query, (ctx.message.guild.id, ))
+    await cursor.execute(sql_select_query, (ctx.message.guild.id,))
     records = await cursor.fetchall()
     print("Fetching teamkillers list")
     msg = "TeamKillers: \n"
@@ -290,7 +281,7 @@ async def wipe(ctx, password: str):
 
     if password == wipe_password:
 
-        await cursor.execute(sql_update_query, (ctx.message.guild.id, ))
+        await cursor.execute(sql_update_query, (ctx.message.guild.id,))
 
         msg = "WIPEEEEEEED"
     else:
@@ -331,7 +322,6 @@ async def rename(ctx, name: str, new_name: str):
     await cursor.close()
 
 
-
 @bot.command()
 async def nigel(ctx):
     """Absolutely thrashes someone"""
@@ -350,12 +340,12 @@ async def winner(ctx):
     cursor = await conn.cursor()
 
     sql_select_query = """SELECT * FROM teamkills WHERE guild_id = %s ORDER BY deaths desc LIMIT 1"""
-    await cursor.execute(sql_select_query, (ctx.message.guild.id, ))
+    await cursor.execute(sql_select_query, (ctx.message.guild.id,))
     record = await cursor.fetchone()
     if record is not None:
         msg = "As it looks, " + \
-            record[1] + " is in the lead with a smashing " + \
-            str(record[3]) + " teamkills."
+              record[1] + " is in the lead with a smashing " + \
+              str(record[3]) + " teamkills."
     else:
         msg = "Nobody is here"
 
@@ -363,7 +353,7 @@ async def winner(ctx):
     await cursor.close()
 
 
-@ bot.command()
+@bot.command()
 async def what(ctx):
     """Help message"""
     await ctx.send("""
@@ -416,9 +406,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
         self.title = data.get('title')
         self.url = data.get('url')
 
-
-    @ classmethod
-
+    @classmethod
     async def from_url(cls, url, *, loop=None, stream=False):
         loop = loop or asyncio.get_event_loop()
         data = await loop.run_in_executor(None, lambda: ytdl.extract_info(url, download=not stream))
@@ -435,9 +423,7 @@ class Music(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-
-    @ commands.command()
-
+    @commands.command()
     async def join(self, ctx, *, channel: discord.VoiceChannel):
         """Joins a voice channel"""
 
@@ -445,7 +431,6 @@ class Music(commands.Cog):
             return await ctx.voice_client.move_to(channel)
 
         await channel.connect()
-
 
     # @commands.command()
     # async def play(self, ctx, *, query):
@@ -456,7 +441,7 @@ class Music(commands.Cog):
     #
     #     await ctx.send('Now playing: {}'.format(query))
 
-    @ commands.command()
+    @commands.command()
     async def yt(self, ctx, *, url):
         """Plays from a url (almost anything youtube_dl supports)"""
 
@@ -467,21 +452,29 @@ class Music(commands.Cog):
 
         await ctx.send('Now playing: {}'.format(player.title))
 
-    @ commands.command()
-
+    @commands.command()
     async def play(self, ctx, *, url):
         """Streams from a url (same as yt, but doesn't predownload)"""
 
         async with ctx.typing():
             player = await YTDLSource.from_url(url, loop=self.bot.loop, stream=True)
-
             ctx.voice_client.play(player, after=lambda e: print(
                 'Player error: %s' % e) if e else None)
 
         await ctx.send('Now playing: {}'.format(player.title))
 
-    @ commands.command()
+    @commands.command()
+    async def stimpy(self, ctx, *, url=""):
+        """Streams from a url (same as yt, but doesn't predownload)"""
+        url = "https://youtu.be/IZui2PYfTSk"
+        async with ctx.typing():
+            player = await YTDLSource.from_url(url, loop=self.bot.loop, stream=True)
+            ctx.voice_client.play(player, after=lambda e: print(
+                'Player error: %s' % e) if e else None)
 
+        await ctx.send('Now playing: {}'.format(player.title))
+
+    @commands.command()
     async def volume(self, ctx, volume: int):
         """Changes the player's volume"""
 
@@ -491,18 +484,15 @@ class Music(commands.Cog):
         ctx.voice_client.source.volume = volume / 100
         await ctx.send("Changed volume to {}%".format(volume))
 
-
-    @ commands.command()
-
+    @commands.command()
     async def stop(self, ctx):
         """Stops and disconnects the bot from voice"""
 
         await ctx.voice_client.disconnect()
 
-
-    @ play.before_invoke
-    @ yt.before_invoke
-
+    @play.before_invoke
+    @stimpy.before_invoke
+    @yt.before_invoke
     async def ensure_voice(self, ctx):
         if ctx.voice_client is None:
             if ctx.author.voice:
